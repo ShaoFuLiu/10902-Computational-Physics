@@ -1,8 +1,9 @@
 import pandas as pd 
 import numpy as np
 from numpy import linalg as LA
+import matplotlib.pyplot as plt
 
-## Output ground state eigvec/eigval and spin matrix array of Spin-1/2
+## Output eigvec/eigval and spin matrix array of Spin-1/2
 def Spin05(n, J, h, BC):  
     sx = ([[0,0.5],[0.5,0]])
     sz = ([[0.5,0],[0,-0.5]])
@@ -53,43 +54,70 @@ def Spin05(n, J, h, BC):
 
     return w ,v ,arr
 
-## Output ground state Sz Expectation value
-def S05_Expctation_Sz(n, w, v, arr):  
+## Output "ground state" Sz Expectation value
+def S05_Expectation_Sz(n, w, v, arr):  
     Exp_Sz = 0
     EVe = v[:,0]
     TEVe = np.transpose(EVe)
-    for i in range(n): ## Sum(VT * Si * V)
+    for i in range(n): ## VT * Si * V
         site = i+1
         Exp_Sz += np.matmul(np.matmul(TEVe ,arr[2*site-1]) ,EVe) 
-    Exp_Sz = Exp_Sz/n 
+    Exp_Sz = Exp_Sz/n ## Sum<Siz> / n
 
     return Exp_Sz
 
-## Output ground state Sx Expectation value
-def S05_Expctation_Sx(n, w, v, arr):  
+## Output "ground state" Sx Expectation value
+def S05_Expectation_Sx(n, w, v, arr):  
     Exp_Sx = 0
     EVe = v[:,0]
     TEVe = np.transpose(EVe)
-    for i in range(n): ## VT * S * V
+    for i in range(n): ## VT * Sx * V
         site = i+1
         Exp_Sx += np.matmul(np.matmul(TEVe ,arr[2*site-2]) ,EVe) 
-    Exp_Sx = Exp_Sx/n  ## Sum<Si> / n
+    Exp_Sx = Exp_Sx/n  ## Sum<Six> / n
 
     return Exp_Sx
 
 ## Initial condition 
-n = 4
+ns = [4,6,8]
 J = 1
-h = 0.5
+h = np.linspace(0,1,num=11)
 BC = 'PBC'
+# ## Calculation
+# w ,v ,arr = Spin05(n, J, h, BC)
+# EVal = w[0] 
+# print('Grond state eigenvalue = ',EVal ,'\n')
+# EVec = v[:,0]
+# print('Ground state eigenvector = ',EVec, '\n')
+# Exp_Sz = S05_Expectation_Sz(n, w, v, arr)
+# print('<Sz> = ',Exp_Sz, '\n')
+# Exp_Sx = S05_Expectation_Sx(n, w, v, arr)
+# print('<Sx> = ',Exp_Sx)
 
-## Calculation
-w ,v ,arr = Spin05(n, J, h, BC)
-EVal = w[0] 
-print('Eigenvalue = ',EVal)
-EVec = v[:,0]
-print('Eigenvector = ',EVec)
-Exp_Sz = S05_Expctation_Sz(n, w, v, arr)
-print('<Sz> = ',Exp_Sz)
-Exp_Sx = S05_Expctation_Sx(n, w, v, arr)
-print('<Sx> = ',Exp_Sx)
+for i in range(len(ns)):
+    n = ns[i]
+    Szs = []
+    hs = []
+    for j in range(len(h)):
+        w ,v ,arr = Spin05(n, J, h[j], BC)
+        EVal_0 = w[0]
+        EVal_1 = w[1]
+        #EVec = v[:,0]
+        Szs.append(EVal_1-EVal_0)
+        hs.append(h[j])
+
+    plt.plot(hs, Szs, '-o', markersize = 4, label = 'L=%d, h=%f' %(n, h))
+
+# print(Szs)
+# print(hs)
+
+# plt.xlabel('r = |i - j|', fontsize=14)
+# plt.ylabel(r'$C_b(r)$', fontsize=14)
+# #plt.xlim(3,32)
+# #plt.ylim(0.001, 1)
+# plt.xscale('log')
+# plt.yscale('log')
+# plt.title(r'Bulk correlation(average %d) , $\delta$ = %s, Dimer = %s, $\chi$ = 30' % (int(N), J, D), fontsize=12)
+#plt.legend(loc = 'best')
+plt.savefig('1.pdf', format='pdf', dpi=4000)
+#plt.show()
