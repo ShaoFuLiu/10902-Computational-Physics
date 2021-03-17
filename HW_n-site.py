@@ -1,13 +1,13 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
 
 ## Output eigvec/eigval and spin matrix array of Spin-1/2
-def Spin05(n, J, h, BC):  
+def Spin05(n, J, h, BC):
     sx = ([[0,0.5],[0.5,0]])
     sz = ([[0.5,0],[0,-0.5]])
-    arr = [] 
+    arr = []
 
     for i in range(n):
         site = i+1
@@ -45,7 +45,7 @@ def Spin05(n, J, h, BC):
         Inter += np.matmul(arr[I+1],arr[I+3])
         if (BC == 'PBC' and i+1 == n-1):
             Inter += np.matmul(arr[-1],arr[1]) ## Last interacion part (Snz*S1z) for PBC
-            
+
     for i in range(n):
         Single += arr[i*2]
 
@@ -55,37 +55,37 @@ def Spin05(n, J, h, BC):
     return w ,v ,arr
 
 ## Output "ground state" Sz Expectation value
-def S05_Expectation_Sz(n, w, v, arr):  
+def S05_Expectation_Sz(n, w, v, arr):
     Exp_Sz = 0
     EVe = v[:,0]
     TEVe = np.transpose(EVe)
     for i in range(n): ## VT * Si * V
         site = i+1
-        Exp_Sz += np.matmul(np.matmul(TEVe ,arr[2*site-1]) ,EVe) 
+        Exp_Sz += np.matmul(np.matmul(TEVe ,arr[2*site-1]) ,EVe)
     Exp_Sz = Exp_Sz/n ## Sum<Siz> / n
 
     return Exp_Sz
 
 ## Output "ground state" Sx Expectation value
-def S05_Expectation_Sx(n, w, v, arr):  
+def S05_Expectation_Sx(n, w, v, arr):
     Exp_Sx = 0
     EVe = v[:,0]
     TEVe = np.transpose(EVe)
     for i in range(n): ## VT * Sx * V
         site = i+1
-        Exp_Sx += np.matmul(np.matmul(TEVe ,arr[2*site-2]) ,EVe) 
+        Exp_Sx += np.matmul(np.matmul(TEVe ,arr[2*site-2]) ,EVe)
     Exp_Sx = Exp_Sx/n  ## Sum<Six> / n
 
     return Exp_Sx
 
-## Initial condition 
+## Initial condition
 ns = [4,6,8]
 J = 1
 h = np.linspace(0,1,num=11)
 BC = 'PBC'
 # ## Calculation
 # w ,v ,arr = Spin05(n, J, h, BC)
-# EVal = w[0] 
+# EVal = w[0]
 # print('Grond state eigenvalue = ',EVal ,'\n')
 # EVec = v[:,0]
 # print('Ground state eigenvector = ',EVec, '\n')
@@ -106,18 +106,18 @@ for i in range(len(ns)):
         Szs.append(EVal_1-EVal_0)
         hs.append(h[j])
 
-    plt.plot(hs, Szs, '-o', markersize = 4, label = 'L=%d, h=%f' %(n, h))
+    plt.plot(hs, Szs, '-o', markersize = 4, label = 'L=%d' %(n))
 
 # print(Szs)
 # print(hs)
 
-# plt.xlabel('r = |i - j|', fontsize=14)
-# plt.ylabel(r'$C_b(r)$', fontsize=14)
-# #plt.xlim(3,32)
-# #plt.ylim(0.001, 1)
+plt.xlabel(r'h', fontsize=14)
+plt.ylabel(r'$Sz(h)$', fontsize=14)
+# plt.xlim(3,32)
+# plt.ylim(0.001, 1)
 # plt.xscale('log')
 # plt.yscale('log')
-# plt.title(r'Bulk correlation(average %d) , $\delta$ = %s, Dimer = %s, $\chi$ = 30' % (int(N), J, D), fontsize=12)
-#plt.legend(loc = 'best')
+plt.title(r'Sz vs h, J = %d' %(J), fontsize=12)
+plt.legend(loc = 'best')
 plt.savefig('1.pdf', format='pdf', dpi=4000)
-#plt.show()
+# plt.show()
