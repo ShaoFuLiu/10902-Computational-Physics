@@ -79,8 +79,8 @@ def S05_Expectation_Sx(n, w, v, arr):
     return Exp_Sx
 
 ## Initial condition
-ns = [4,6,8]
-J = 1
+ns = [4,6,8,10]
+J = 2
 h = np.linspace(0,1,num=11)
 BC = 'PBC'
 # ## Calculation
@@ -119,5 +119,5 @@ plt.ylabel(r'$Sz(h)$', fontsize=14)
 # plt.yscale('log')
 plt.title(r'Sz vs h, J = %d' %(J), fontsize=12)
 plt.legend(loc = 'best')
-plt.savefig('1.pdf', format='pdf', dpi=4000)
+plt.savefig('/home/liusf/10902-Computational-Physics/2.pdf', format='pdf', dpi=4000)
 # plt.show()
