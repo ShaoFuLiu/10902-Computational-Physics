@@ -1,8 +1,6 @@
-import pandas as pd
 import numpy as np
-import math as math
-from numpy import linalg as LA
-from sklearn import preprocessing
+from scipy.linalg import eig, eigh
+from scipy.sparse.linalg import eigs, eigsh
 
 def Spin05(n, BC):
     sx = ([[0,0.5],[0.5,0]])
@@ -49,31 +47,32 @@ def Spin05(n, BC):
     for i in range(n):
         Single += arr[i*2]
 
-    H = Inter ## Wirte down hamiltonion
+    H = Inter ## Wirte down Hamiltonion
 
     return H
 
-def normalization(data):
-    _range = np.max(data) - np.min(data)
-    return (data - np.min(data)) / _range
+def Sn_Operation(S, Phi, n): # return operated Phi
+    phi_Snz = np.swapaxes(Phi, 0, n)
+    phi_Snz = np.tensordot(S, phi_Snz, axes=(1,0))
+    phi_Snz = np.swapaxes(phi_Snz, 0, n)
 
-sz = ([[0.5,0],[0,-0.5]])
-n = 2
-J = 1
-h = 0.5
+    return phi_Snz
+
 BC = "OBC"
-Phi = [[1, 2], [3, 4]]
-Phi_2 = np.reshape(Phi, (4, 1))
-# normalize_phi = normalization(phi)
-# Phi = normalize_phi.reshape((2, 2, 2))
-# print(sz)
-# print(Phi)
+sz = np.array([[0.5,0],[0,-0.5]])
+N = 4 # number of sites
+elements = np.power(2, N) # number of element
+Phi = np.random.randint(elements, size=(2, 2, 2, 2)) # Creat random vector Phi
+Phi_total = 0
 
-for i in range(n):
-    Phi = np.tensordot(sz,Phi, axes=(1,n-1)) ## SumSz1'(SumSz2'(Sz1 * Sz2 * Phi))
-print(Phi.reshape(4, 1))
+for m in range(N-1): # For PBC(N),For OBC(N-1)
+    n = m+1
+    Phi_SnSm = Sn_Operation(sz, Sn_Operation(sz, Phi, n), m)
+    Phi_total += Phi_SnSm
 
-H = Spin05(n, BC)
-print(H,'\n',Phi_2)
-Vec = np.tensordot(H, Phi_2, axes=(1,0))
-print(Vec) ## H |Phi>
+## Direct product H |Phi>
+H = Spin05(N, BC)
+Phi_V = np.reshape(Phi, (elements, 1)) # Reshape of Phi
+Vec = np.tensordot(H, Phi_V, axes=(1,0))
+
+print('Two ways diff = \n',Vec-Phi_total.reshape((elements, 1)))
